@@ -862,8 +862,3 @@ else:
     merged_final_save.write_csv(args.outputFileName)
     print(merged_final_save)
 
-
-    
-# python oncofuse/main.py ../pau_test/pau_coords.txt manual ../pau_test/pau_fusions_testing.txt
-
-# python oncofuse/main.py ../deep_test/DeepPrior_results.csv manual ../deep_test/deep_result.txt -t AVG -g
