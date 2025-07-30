@@ -449,7 +449,7 @@ print(f"[{date.today()}] Loading domain and protein interaction interface-relate
 domain_df = pl.read_csv(domainsFileName,has_header=False,separator="\t").rename({"column_1":"geneName","column_2":"featureId","column_3":"aaFrom","column_4":"aaTo","column_5":"Domain/Family"})
 piis_df = pl.read_csv(piisFileName,has_header=False,separator="\t").rename({"column_1":"geneName","column_2":"featureId","column_3":"aaFrom","column_4":"aaTo"})
 
-print(f"[{date.today()}] Loading gene ontology data (time-consuming)")
+print(f"[{date.today()}] Loading gene ontology data")
 
 gene2GO_df = pl.read_parquet(gene2GO_Name)
 
@@ -586,10 +586,7 @@ def exp_data(df:pl.DataFrame):
 tissue_esp_5 = exp_data(annotated_5_df)
 tissue_esp_3 = exp_data(annotated_3_df)
 
-
-print(f"[{date.today()}] == Stage #2: some computations")
-
-print(f"[{date.today()}] == Domain & PII related (time-consuming)")
+print(f"[{date.today()}] == Domain & PII related")
 
 def count_piis(df:pl.DataFrame,strand:str,gene_name_col="name2"):
 

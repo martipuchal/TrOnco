@@ -89,6 +89,23 @@ Example with only the positional coordinates on teh file and teh tissue informat
 singularity exec image/image_python3_8.sif python main/TrOnco.py \
   resources/example/example_pos.csv example_results.csv -t AVG
 ```
+
+
+#### Input table columns
+
+| Column Name | Type     | Optionality  | Description |
+| :---------- | :------- | :----------- | :-----------|
+| `chrom5`    | `string` | **Required** | Chormosomome of the 5' gene |
+| `pos5`      | `int`    | **Required** | Position of the breakpoint of the 5' Chormosomome |
+| `chrom3`    | `string` | **Required** | Chormosomome of the 3' gene |
+| `pos3`      | `int`    | **Required** | Position of the breakpoint of the 3' Chormosomome |
+| `tissue`    | `string` | **Optional** | Tissue of origin of the fusion |
+| `strand5`   | `string` | **Required** | Strand of the 5'gene |
+| `strand3`   | `string` | **Required** | Strand of the 3'gene |
+| `geneName5` | `string` | **Optional** | Gene name of the 5'gene |
+| `geneName3` | `string` | **Optional** | Gene name of the 3'gene |
+
+
 ## Features
 
 - Vector modification: 
@@ -127,5 +144,89 @@ Changing this with new dataSets open the posibiliti to retrain the model with ne
 - utrData_5 / utrData_3 -> Expresion value for each gene. This values is not tissue specific.
 - n_piis_retained_5 / n_piis_retained_3 -> Protein interactions retained of the resulting protein of the 5' gene / 3' gene
 - n_piis_lost_5 / n_piis_lost_3 -> Protein interactions lost of the resulting protein of the 5' gene / 3' gene
+
+
+#### Output table columns
+
+
+| Column Name       | Type     |  Description |
+| :---------------- | :------- | :------- |
+| `Fusion_id`       | `int`    | Position of the fusion on the input file |
+| `chrom5`          | `string` | Chormosomome of the 5' gene |
+| `pos5`            | `int`    | Position of the breakpoint of the 5' Chormosomome |
+| `tissue`          | `string` | Tissue of origin of the fusion |
+| `strand5`         | `int`    | Strand of the 5' gene |
+| `geneName5`       | `string` | Name2 in the refSeq of the 5' gene
+| `exonStarts`      | `list`   | List of positions of the exons starts of the 5' gene |
+| `exonEnd`         | `list`   | List of positions of the exons end of the 5' gene |
+| `cdsStart`        | `int`    | Position of the cdsStart |
+| `cdsEnd`          | `int`    | Position of the cdsEnd |
+| `inFrame_5`       | `string` | YES/NO if the 5' gene is in frame |
+| `aapos5`          | `int`    | Number of aminoacids from 5' gene |
+| `Sequence5`       | `string` | Sequence of nucleotids of the 5' gene |
+| `domain_retained` | `list`   | ID of the domains retained in the 5' protein |
+| `domain_broken`   | `list`   | ID of the domains broken in the 5' protein |
+| `domain_lost`     | `list`   | ID of the domains lost in the 5' protein |
+| `pii_retained_5`  | `list`   | List of protein names wich interact with 5' protein |
+| `pii_lost_5`      | `list`   | List of protein names wich lost interaction with 5' protein |
+| `name2`           | `string` | Gene name of the 5' from the refSeq annotation |
+| `promData`        | `float`  | Promotor actibity of the 5' gene |
+| `exprData`        | `float`  | Expression data of the 5' gene |
+| `utrData`         | `float`  | Expression data of the 5' gene from utr region |
+| `n_self_pii_retained` | `int`| Number of protein interactions corrected of 5' protein |
+| `n_pii_retained`  | `int`    | Number of protein interactions of 5' protein |
+| `n_self_pii_lost` | `int`    | Number of protein interactions corrected lost of 5' protein |
+| `n_pii_lost`      | `int`    | Number of protein interactions lost of 5' protein |
+| `GO`              | `list`   | List of the GO terms of the 5' gene |
+| `Theme`           | `list`   | List of GO groups present in 5' gene |
+| `IdTheme`         | `list`   | List of GO groups present as ID in 5'gene |
+| `CTF`             | `int`    | Number of CTF in the GO groups in 5' gene |
+| `G`               | `int`    | Number of G in the GO groups in 5' gene |
+| `H`               | `int`    | Number of H in the GO groups in 5' gene |
+| `K`               | `int`    | Number of P in the GO groups in 5' gene |
+| `P`               | `int`    | Number of P in the GO groups in 5' gene |
+| `TF`              | `int`    | Number of TF in the GO groups in 5' gene |
+| `chrom3`          | `string` | Chormosomome of the 3' gene |
+| `pos3`            | `int`    | Position of the breakpoint of the 3' Chormosomome |
+| `tissue3`         | `string` | Duplicate of the tissue Column |
+| `strand3`         | `int`    | Strand of the 3' gene |
+| `geneName3`       | `string` | Name2 in the refSeq of the 3' gene
+| `exonStarts3`     | `list`   | List of positions of the exons starts of the 3' gene |
+| `exonEnd3`        | `list`   | List of positions of the exons end of the 5' gene |
+| `cdsStart3`       | `int`    | Position of the cdsStart of the 3' gene|
+| `cdsEnd3`         | `int`    | Position of the cdsEnd of the 3' gene|
+| `inFrame_3`       | `string` | YES/NO if the 3' gene is in frame |
+| `aapos3`          | `int`    | Number of aminoacids from 3' gene |
+| `Sequence3`       | `string` | Sequence of nucleotids of the 3' gene |
+| `domain_retained3`| `list`   | ID of the domains retained in the 3' protein |
+| `domain_broken3`  | `list`   | ID of the domains broken in the 3' protein |
+| `domain_lost3`    | `list`   | ID of the domains lost in the 3' protein |
+| `pii_retained_3`  | `list`   | List of protein names wich interact with 3' protein |
+| `pii_lost_3`      | `list`   | List of protein names wich lost interaction with 3' protein |
+| `name23`          | `string` | Gene name of the 3' from the refSeq annotation |
+| `promData3`       | `float`  | Promotor actibity of the 3' gene |
+| `exprData3`       | `float`  | Expression data of the 3' gene |
+| `utrData3`        | `float`  | Expression data of the 3' gene from utr region |
+| `n_self_pii_retained3`| `int`| Number of protein interactions corrected of 3' protein |
+| `n_pii_retained3` | `int`    | Number of protein interactions of 3' protein |
+| `n_self_pii_lost3`| `int`    | Number of protein interactions corrected lost of 3' protein |
+| `n_pii_lost3`     | `int`    | Number of protein interactions lost of 3' protein |
+| `GO3`             | `list`   | List of the GO terms of the 3' gene |
+| `Theme3`          | `list`   | List of GO groups present in 3' gene |
+| `IdTheme3`        | `list`   | List of GO groups present as ID in 3'gene |
+| `CTF3`            | `int`    | Number of CTF in the GO groups in 3' gene |
+| `G3`              | `int`    | Number of G in the GO groups in 3' gene |
+| `H3`              | `int`    | Number of H in the GO groups in 3' gene |
+| `K3`              | `int`    | Number of P in the GO groups in 3' gene |
+| `P3`              | `int`    | Number of P in the GO groups in 3' gene |
+| `TF3`             | `int`    | Number of TF in the GO groups in 3' gene |
+| `FUSION_PROTEIN`  | `string` | Sequence of the protein result of the fusion |
+| `vector`          | `list`   | Vecor used to classify the fusion |
+| `RF_prob`         | `float`  | Probability obatin with the Random Forest model |
+| `XGB_prob`        | `float`  | Probability obatin with the XGBoost model |
+| `TF_prob`         | `float`  | Probability obatin with the TensorFlow CNN model |
+| `RF_Classification`  | `string` | Class obtain with the probability from the Random Forest model |
+| `XGB_Classification` | `string` |  Class obtain with the probability from the XGBoost model |
+| `TF_Classification` | `string` |  Class obtain with the probability from the TensorFlow CNN model |
 
 
