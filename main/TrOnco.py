@@ -821,6 +821,7 @@ for df_line in merged.iter_rows(named=True):
     prob = RF_model.predict_proba([vector])[:, 1]
     scores.append(prob[0])
     classification = class_round(prob[0], RF_threshold)
+    classification = "DRIVER" if prob[0]>RF_threshold else "PASSENGER"
     lclassification.append(classification)
 
     # XGBoost prediction
@@ -863,4 +864,6 @@ if args.v:
 else:
     merged_final_save.write_csv(args.outputFileName)
     print(merged_final_save)
+
+print("RandomForest threshold: ",RF_threshold, "XGBoost threshold: ",XGB_threshold, "Tensor Flow CNN threshold: ", TF_threshold)
 
