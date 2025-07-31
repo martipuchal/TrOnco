@@ -75,8 +75,8 @@ tree_m = str(args.tree)
 path = "tmp/"
 save_path = "resources/common/"
 
-notoncofusions = pd.read_csv(path+"normal_vector",sep=",")
-oncofusions = pd.read_csv(path+"tumor_vector",sep=",")
+notoncofusions = pd.read_csv(path+"Normal_vector",sep=",")
+oncofusions = pd.read_csv(path+"Tumor_vector",sep=",")
 
 # Build the datafrmaes
 oncofusions["target"] = 1
@@ -114,7 +114,7 @@ joblib.dump(classifier, save_path+"modelRF.bin")
 
 # ROC curve for the RF model
 y_pred_prob = classifier.predict_proba(X_test)[:, 1]
-fpr, tpr, thresholds = roc_curve(y_test, y_pred_prob, pos_label=1)
+fpr, tpr, thresholds = evalRF = roc_curve(y_test, y_pred_prob, pos_label=1)
 roc_auc = roc_auc_score(y_test, [round(val) for val in y_pred_prob])
 
 print("ROC AUC of the random forest model",roc_auc)
@@ -166,7 +166,7 @@ print("Selected itineration: ",iteration)
 model = model_base[iteration]
 
 # Evaluate the model
-preds =  model.predict(xgb_test)
+preds = y_pred_prob =  model.predict(xgb_test)
 
 def round (num:float):
     """Modify the threshold of the function.
@@ -193,6 +193,8 @@ print(f'Sensitivity: {sensitivity * 100:.2f}%')
 
 roc_auc = roc_auc_score(y_test, preds)
 print("ROC AUC of the XGBoost model",roc_auc)
+fpr, tpr, thresholds = evalXGB = roc_curve(y_test, y_pred_prob, pos_label=1)
+
 
 classification_rep = classification_report(y_test, preds)
 
@@ -285,3 +287,36 @@ print(f"\nTraining AUC: {train_auc[-1]:.4f}")
 print(f"Validation AUC: {val_auc[-1]:.4f}")
 
 model.save(save_path+'modelTF.h5')
+
+y_pred_prob = []
+for vector in X_test:
+    input_X = np.array(vector, dtype='float32').reshape(-1, 28, 1)
+    #prob_positive = TF_model.predict(input_X)[0][0]
+    prob_positive = model.predict(input_X)[0, 1]
+    y_pred_prob.append(prob_positive)
+
+fpr, tpr, thresholds = evalTF = roc_curve(y_test, y_pred_prob, pos_label=1)
+
+with open(save_path+"config.txt", "w") as f:
+    f.write("\t".join(["fpr", "tpr", "thresholds"])+"\n")
+
+    for eval in evalRF, evalXGB, evalTF:
+        fpr, tpr, thresholds = eval
+        def obtain_t ():
+            fpr_max = max(fpr)
+            for f, t, th in zip(fpr, tpr, thresholds):
+                if t >= max(tpr) and f<=fpr_max:
+
+                    fpr_max = f
+
+                    f_return = f
+                    t_return = t
+                    th_return = th
+                    
+            return [f_return,t_return,th_return]
+                
+        print("Config file test")
+        line = obtain_t()
+        print(line)
+
+        f.write("\t".join([str(e) for e in line])+"\n")

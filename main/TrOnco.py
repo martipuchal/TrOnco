@@ -54,8 +54,8 @@ parser.add_argument("inputFileName", help= "Path to the input file")
 #parser.add_argument("inputType", help= "Input type (coord, fcatcher, tophat, etc.)")
 
 # Tissue type
-parser.add_argument("-t","--tissue", nargs="?",
-                        help="Tissue type (EPI, HEM, MES or AVG)")
+parser.add_argument("-t","--tissue", nargs="?", default="-",
+                        help="Tissue type (EPI, HEM, MES, AVG) or '-' (default: -)")
 
 # Path to the output file
 parser.add_argument("outputFileName", help= "Path to the output file")
@@ -79,13 +79,14 @@ go2themeFileName = Homedir+"/common/go2theme.txt"
 classifierFileName = Homedir+"/common/modelRF.bin"
 gene2GO_Name = Homedir+"/common/biomart_results"; genomeFileName = Homedir+f"/common/{args.a}.fa"
 XGBclassifierFIleName = Homedir+"/common/modelXGB.json"; TFclassifierFIleName  = Homedir+"/common/modelTF.h5"
+configFIleName = Homedir+"/common/config.txt"
 
 
 All_files = [canonicalTranscriptsFileName, refseqFileName, libFolderName,
              domainsFileName, piisFileName, gene2DavidIdFileName, 
              ffasRangesFileName, go2themeFileName, gene2GO_Name,
              classifierFileName,genomeFileName,XGBclassifierFIleName,
-             TFclassifierFIleName]
+             TFclassifierFIleName,configFIleName]
 # Inform of missing libs
 missing = [file for file in All_files if not Path(file).exists()]
 if len(missing)> 0:
@@ -807,6 +808,10 @@ def class_round(num:float, threshold:float):
 
 
 print(f"[{date.today()}] == Classifier initialization")
+
+config_df = pl.read_csv(configFIleName,separator="\t")
+RF_threshold, XGB_threshold, TF_threshold = config_df["thresholds"]
+
 for df_line in merged.iter_rows(named=True):
     # Vector generation
     vector = vec_parser(df_line)
@@ -815,12 +820,12 @@ for df_line in merged.iter_rows(named=True):
     # RF prediction
     prob = RF_model.predict_proba([vector])[:, 1]
     scores.append(prob[0])
-    classification = class_round(prob[0],0.5)
+    classification = class_round(prob[0], RF_threshold)
     lclassification.append(classification)
 
     # XGBoost prediction
     preds = XGB_model.predict_proba([vector])[0][1]
-    classification2 = class_round(float(preds),0.8)
+    classification2 = class_round(float(preds),XGB_threshold)
     scores2.append(preds)
     l2classification.append(classification2)
 
@@ -829,7 +834,7 @@ for df_line in merged.iter_rows(named=True):
     #prob_positive = TF_model.predict(input_X)[0][0]
     prob_positive = TF_model.predict(input_X)[0, 1]
     scores3.append(prob_positive)
-    classification3 = "DRIVER" if prob_positive>0.8 else "PASSENGER"
+    classification3 = "DRIVER" if prob_positive>TF_threshold else "PASSENGER"
     l3classification.append(classification3)
 
 
