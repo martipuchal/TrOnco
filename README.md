@@ -1,9 +1,9 @@
 
 # TrOnco
 
-TrOnco is a novel machine learning tool based on random forest. Designed to classify translocations as oncogenic or non-oncogenic by integrating multiple omics data, including genomics, transcriptomics, or proteomics.
+TrOnco is a novel machine learning tool based on random forest, XGBoost and CNN of TensorFlow. Designed to classify translocations as oncogenic or non-oncogenic by integrating multiple omics data, including genomics, transcriptomics, or proteomics. With an easy retraining capability, TrOnco offers the option to keep updating the models.
 
-The source code and the latest binary versionof the framework is present in this repository.
+The source code and the latest binary version of the framework are present in this repository.
 
 
 
@@ -19,7 +19,7 @@ The source code and the latest binary versionof the framework is present in this
 
 ## Installation
 
-- To obtain all the code clone the git repository
+- To obtain all the code, clone the Git repository.
 
 ```bash
   git clone https://github.com/martipuchal/TrOnco.git
@@ -27,29 +27,30 @@ The source code and the latest binary versionof the framework is present in this
 ```
 
 - Obtain the Human reference genome (hg19.fa)
-The Humann Reference Genome is a big fasta file wich can not be uploaded in to the git repository for that we are going to dowload it direcly from the UCSC. 
+The Human Reference Genome is a big FASTA file, which cannot be uploaded into the Git repository; for that, we are going to download it directly from the UCSC. 
 ```bash
 wget https://hgdownload.cse.ucsc.edu/goldenpath/hg19/bigZips/hg19.fa.gz
 gunzip hg19.fa.gz
 mv hg19.fa resources/common/hg19.fa
 ```    
+- Build the image with singularity to use TrOnco.
 
-- Build the image with singularity to use TrOnco
-The hole progrma was build under the Python version 3.8 due to packages requirements. In order to improve the user experience we build a images with all the python packages and some R tools to analyze the data everything under a Ubuntu OS using conda to merge everything to a single image.
+The whole program was built under the Python version 3.8 due to package requirements. In order to improve the user experience, we build an image with all the Python packages and some R tools to analyze the data, everything under an Ubuntu OS, using conda to merge everything to a single image.
+
 ```bash
 sudo singularity build images/image_python3_8.sif images/defFile_python3_8.def
 ```
 
 ## Usage
 
-All the different scrips are goint to be run under the prebuild image. The main script, TrOnco.py will run all the analyis of the different genen translocations.
+All the different scripts are going to be run under the pre-built image. The main script, TrOnco.py, will run all the analyses of the different gene translocations.
 
 ```bash
 singularity exec image/image_python3_8.sif \
   python main/TrOnco.py /Path/To/imput_file /Path/For/Result_file -t AVG
 ```
 
-TrOnco use tissue specific data to analyses the different gene translocations. The two principal ways to mark the trasnlocations are: Inside the file or outseide the file. With a column name **tissue** each fusion can be mark with a tissue of origin. TrOnco have the optionality to mark all fusions from a file with teh same tissue of origin without the need of the additon of an extra column. Using the flag **-t** you can mark all the fusions with the same tissue. The different tissues are:
+TrOnco uses tissue-specific data to analyze the different gene translocations. The two principal ways to mark the translocations are inside the file or outside the file. With a column named **tissue**, each fusion can be marked with a tissue of origin. TrOnco has the optionality to mark all fusions from a file with the same tissue of origin without the need of the addition of an extra column. Using the flag **-t**, you can mark all the fusions with the same tissue. The different tissues are:
 
 - EPI -> Epithelial 
 - HEM -> Hematological
@@ -57,13 +58,13 @@ TrOnco use tissue specific data to analyses the different gene translocations. T
 - END -> Endometrial
 - AVG -> Not defined(Averege)
 
-As coordinates are used to retreave gene information some problems can ocur in the annotation of the genes. To avoid this problematic we add a flag to correct this issue(**-g**). With the addition of two suplementari columns on the input file with the gene name of the 5' gene(**geneName5**) and the 3' gene(**geneName3**) we are able to get the information from the refSeq insted of the coordinates with the gene names.
+As coordinates are used to retrieve gene information, some problems can occur in the annotation of the genes. To avoid this problem, we add a flag to correct this issue (**-g**). With the addition of two supplementary columns on the input file with the gene name of the 5' gene (**geneName5**) and the 3' gene (**geneName3**), we are able to get the information from the refSeq instead of the coordinates with the gene names.
 
-In order to select the Genome version we add the flag(**-a**). By default TrOnco uses **hg19** and we provide all files to perform all the analysis. New or old versions can be used. 
+In order to select the Genome version, we add the flag (**-a**). By default TrOnco uses **hg19**, and we provide all files to perform all the analysis. New or old versions can be used. 
 ```
 **IMPORTANT:** Additional genome version must be added manually by the user. The UCSC fasta and the refSeq file must be added on the common folder before its use.
 ```
-The last flag is specific for the training of the different algorithms(**-v**). With this flag we change the output file. Insted of saving the analysis from Tronco we only save the vector used for the differnt algorithms to predict the problavility of being DRIVER.
+The last flag is specific for the training of the different algorithms (**-v**). With this flag we change the output file. Instead of saving the analysis from TrOnco, we only save the vector used for the different algorithms to predict the probability of being DRIVER.
 
 For more information you can use the help parameter.
 ```bash
@@ -72,9 +73,9 @@ singularity exec images/image_python3_8.sif python main/TrOnco.py -h
 
 ### Examples
 
-As examples of the different input formals allowed are stored in the **example folder** inside of the **resources folder**. 
+Examples of the different input formats allowed are stored in the **example folder** inside of the **resources folder**. 
 
-Example with the tissue information insede the file:
+Example with the tissue information inside the file:
 ```bash
 singularity exec image/image_python3_8.sif python main/TrOnco.py \
   resources/example/example_tissue.csv example_results.csv
@@ -146,7 +147,7 @@ Changing this with new dataSets open the posibiliti to retrain the model with ne
 - n_piis_lost_5 / n_piis_lost_3 -> Protein interactions lost of the resulting protein of the 5' gene / 3' gene
 
 
-#### Output table columns
+### Output table columns
 
 
 | Column Name       | Type     |  Description |
