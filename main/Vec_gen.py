@@ -25,8 +25,8 @@ Atrack_ALLOWED = ["hg18", "hg19", "hg38"] #! S'ha de mirar d'incloure la versió
 
 # Initialize parser
 parser = argparse.ArgumentParser(
-    prog='TrOnco.py',
-    usage="TrOnco.py input_file output_file [options]\n" +
+    prog='Vec_gen.py',
+    usage="Vec_gen.py input_file output_file [options]\n" +
                 "-t -> Supported tissue types: " +
                 "EPI, HEM, MES, END or AVG \n" +
                 "Version 1.0, 29Jul2025\n",
@@ -43,9 +43,6 @@ parser.add_argument("-a",
 
 # Deactivate gene anotation
 parser.add_argument('-g', action='store_true', help="Deactivate gene annotation and use pre-existing gene annotation. Gene column need to be called geneName+[5 or 3] (geneName5/geneName3)")
-
-parser.add_argument("-v", action='store_true', help="Save all the information used in the Fusion analysis.")
-
 
 # Path to file
 parser.add_argument("inputFileName", help= "Path and file name of the input")
@@ -76,17 +73,13 @@ domainsFileName = Homedir+"/common/domains.txt"; piisFileName = Homedir+"/common
 gene2DavidIdFileName = Homedir+"/common/gene_symbol2id.txt"
 ffasRangesFileName = Homedir+"/common/ffas_range.txt"
 go2themeFileName = Homedir+"/common/go2theme.txt"
-classifierFileName = Homedir+"/common/modelRF.bin"
 gene2GO_Name = Homedir+"/common/biomart_results"; genomeFileName = Homedir+f"/common/{args.a}.fa"
-XGBclassifierFIleName = Homedir+"/common/modelXGB.json"; TFclassifierFIleName  = Homedir+"/common/modelTF.h5"
-configFIleName = Homedir+"/common/config.txt"
+
 
 
 All_files = [canonicalTranscriptsFileName, refseqFileName, libFolderName,
              domainsFileName, piisFileName, gene2DavidIdFileName, 
-             ffasRangesFileName, go2themeFileName, gene2GO_Name,
-             classifierFileName,genomeFileName,XGBclassifierFIleName,
-             TFclassifierFIleName,configFIleName]
+             ffasRangesFileName, go2themeFileName, gene2GO_Name,genomeFileName]
 # Inform of missing libs
 missing = [file for file in All_files if not Path(file).exists()]
 if len(missing)> 0:
@@ -776,108 +769,21 @@ merged.insert_column(-1, fusprot_series)
 
 
 vector_list2 = []
-scores = []
-scores2 = []
-scores3 = []
-lclassification = []
-l2classification = []
-l3classification = []
-
-# Load RF classifier
-RF_model = joblib.load(classifierFileName)
-
-# Load XGBoost model
-XGB_model = xgb.XGBClassifier()
-XGB_model.load_model(XGBclassifierFIleName)
-
-# Load TensorFlow model
-TF_model = tf.keras.models.load_model(TFclassifierFIleName)
-
-def class_round(num:float, threshold:float):
-
-    """ Rounds the result from the classifier with a threshold.
-
-    :param num: Probability which is going to be rounded.
-    :param threshold: Probability is going to be use as a threshold.
-    :return: Returns a string classifying the probability.
-    """
-    if num < threshold:
-        return "PASSENGER"
-    else:
-        return "DRIVER"
 
 
 print(f"[{date.today()}] == Classifier initialization")
-
-config_df = pl.read_csv(configFIleName,separator="\t")
-RF_threshold, XGB_threshold, TF_threshold = config_df["thresholds"]
 
 for df_line in merged.iter_rows(named=True):
     # Vector generation
     vector = vec_parser(df_line)
     vector_list2.append(vector)
 
-    # RF prediction
-    prob = RF_model.predict_proba([vector])[:, 1]
-    scores.append(prob[0])
-    classification = class_round(prob[0], RF_threshold)
-    classification = "DRIVER" if prob[0]>RF_threshold else "PASSENGER"
-    lclassification.append(classification)
-
-    # XGBoost prediction
-    preds = XGB_model.predict_proba([vector])[0][1]
-    classification2 = class_round(float(preds),XGB_threshold)
-    scores2.append(preds)
-    l2classification.append(classification2)
-
-    # TensorFlow prediction
-    input_X = np.array(vector).reshape(-1, 28, 1)
-    #prob_positive = TF_model.predict(input_X)[0][0]
-    prob_positive = TF_model.predict(input_X)[0, 1]
-    scores3.append(prob_positive)
-    classification3 = "DRIVER" if prob_positive>TF_threshold else "PASSENGER"
-    l3classification.append(classification3)
-
 
 # Save the results
 merged_final = merged.with_columns(
-    pl.Series("vector",vector_list2,strict=False),
-    pl.Series("RF_prob", scores),
-    pl.Series("XGB_prob", scores2),
-    pl.Series("CNN_prob", scores3),
-    pl.Series("RF_Classification", lclassification),
-    pl.Series("XGB_Classification", l2classification),
-    pl.Series("CNN_Classification", l3classification)
+    pl.Series("vector",vector_list2,strict=False)
 )
 
-merged_final = merged_final.with_columns(FUSION_GENES = pl.concat_str("name2","name23",separator="_"),
-                          rightBreakpoint = pl.concat_str("chrom5","pos5","strand5",separator=":"),
-                          leftBreakpoint = pl.concat_str("chrom3","pos3","strand3",separator=":"))
 
-
-
-if args.v:
-   # Save the final df for debugin.
-    list_cols = [col for col in merged_final.columns if merged_final[col].dtype == pl.List]
-    merged_final_save = merged_final.with_columns(
-        pl.col(list_cols).map_elements(
-            lambda lst: ",".join(str(x) for x in lst) if lst is not None else None,
-            return_dtype=pl.String
-        ))
-    merged_final_save.write_csv(args.outputFileName)
-    print(merged_final_save)
-else:
-    col_list = ["rightBreakpoint","leftBreakpoint","FUSION_GENES","RF_prob","RF_Classification","XGB_prob","XGB_Classification","CNN_prob","CNN_Classification",
-                "FUSION_PROTEIN","GO","GO3","domain_retained","domain_broken","domain_lost","domain_retained3","domain_broken3","domain_lost3"]
-    merged_final = merged_final.select(col_list).rename({"GO":"GO5","domain_retained":"domain_retained5","domain_broken":"domain_broken5","domain_lost":"domain_lost5"})
-    list_cols = [col for col in merged_final.columns if merged_final[col].dtype == pl.List]
-    merged_final_save = merged_final.with_columns(
-        pl.col(list_cols).map_elements(
-            lambda lst: ",".join(str(x) for x in lst) if lst is not None else None,
-            return_dtype=pl.String
-        ))
-    merged_final_save.write_csv(args.outputFileName)
-    print(merged_final_save)
-
-print("RandomForest threshold: ",RF_threshold, "XGBoost threshold: ",XGB_threshold, "Tensor Flow CNN threshold: ", TF_threshold)
-
+vector_list2_df = pl.DataFrame(vector_list2,schema=vector_list_str,orient="row")
+vector_list2_df.write_csv(args.outputFileName)

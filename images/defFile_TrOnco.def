@@ -1,0 +1,65 @@
+Bootstrap: docker
+From: continuumio/miniconda3:latest
+
+%files
+    # You can add any local files here if needed
+    # environment.yml /opt/environment.yml
+
+%post
+    # Update and install basic tools
+    apt-get update && apt-get install -y \
+        wget \
+        bzip2 \
+        ca-certificates \
+        curl \
+        git \
+        vim \
+        build-essential \
+        libgl1-mesa-glx
+        
+    # Python
+   
+    
+    conda create -y -n py38 python=3.8 \
+        numpy=1.19 \
+        pandas=1.2 \
+        scikit-learn=0.24 \
+        tensorflow=2.4 \
+        keras=2.4 \
+        bioconda::pyfaidx
+    
+    conda install -y -n py38 -c conda-forge \
+        polars \
+        joblib \
+        biopython \
+        xgboost \
+        matplotlib
+    
+    # Clean up
+    conda clean -y --all
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+    # Install R via conda
+    conda install -y -c conda-forge r-base r-essentials r-ggplot2 r-tidyverse r-reshape2 r-stringr
+    
+    # Create R configuration directory if it doesn't exist
+    mkdir -p /usr/lib/R/etc/
+    
+    # Set up default R libraries
+    echo 'options(repos = c(CRAN = "https://cloud.r-project.org"))' >> /usr/lib/R/etc/Rprofile.site
+
+    # Alternative location if the above still doesn't work
+    # echo 'options(repos = c(CRAN = "https://cloud.r-project.org"))' >> $(R RHOME)/etc/Rprofile.site
+    
+%environment
+    export LC_ALL=C
+    export PATH="/opt/conda/envs/py38/bin:$PATH"
+
+%runscript
+    # Default command to run when container is executed
+    exec /bin/bash "$@"
+
+%labels
+    Author Marti
+    Version 1.0
+    Description "Singularity image with Conda, Bash, and R"
