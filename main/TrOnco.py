@@ -42,23 +42,23 @@ parser.add_argument("-a",
                     )
 
 # Deactivate gene anotation
-parser.add_argument('-g', action='store_true', help="Deactivate gene anotation and use pre-existing gene annotation. Gene column need to be called geneName+strand (geneName5/geneName3)")
+parser.add_argument('-g', action='store_true', help="Deactivate gene annotation and use pre-existing gene annotation. Gene column need to be called geneName+[5 or 3] (geneName5/geneName3)")
 
-parser.add_argument("-v", action='store_true', help="Save the vecor and not the result matrix, using the output name.")
+parser.add_argument("-v", action='store_true', help="Save the vector and not the result matrix, using the output name.")
 
 
 # Path to file
-parser.add_argument("inputFileName", help= "Path to the input file")
+parser.add_argument("inputFileName", help= "Path and file name of the input")
 
 # input type (deprecated)
 #parser.add_argument("inputType", help= "Input type (coord, fcatcher, tophat, etc.)")
 
 # Tissue type
 parser.add_argument("-t","--tissue", nargs="?", default="-",
-                        help="Tissue type (EPI, HEM, MES, AVG) or '-' (default: -)")
+                        help="Tissue type (Epithelial: EPI, Hematological:HEM, Mesenchymal: MES, Endometrial: END, Not defined(Averege): AVG) or '-' (default: -)")
 
 # Path to the output file
-parser.add_argument("outputFileName", help= "Path to the output file")
+parser.add_argument("outputFileName", help= "Path and fiel name to the output")
 
 
 args = parser.parse_args()
@@ -329,8 +329,8 @@ def to_protein(df:pl.DataFrame,char_bool:bool):
                 coding_seq = sequence[:-2] if char_bool else sequence[2:]
                 coding_dna = Seq(coding_seq)
                 if strand == 0:
-                    print("############### Warning ###############")
-                    print(f'The Gene: {row["name2"]} with strand: {strand} have no defined strand. Forward taken as default')
+                    print("############### Warning no defined strand ###############")
+                    print(f'Gene: {row["name2"]} with strand: {strand}. Forward taken as default')
                 #prot = str(coding_dna.translate())
 
             #prot_list.append(prot)
@@ -502,7 +502,7 @@ def get_rows(fpg_df:pl.DataFrame,fivePrime:bool):
             """
 
             if not gene in sup_data["geneName"]:
-                print( gene," Was omited form the pii analysis, not found on the BD")
+                print( gene," Was omited from the pii analysis, not found on the DataBase")
                 return ([],[],[])
             # Retreave suplementary information of the gene of interest
             region_df = sup_data.filter(

@@ -205,7 +205,7 @@ Changing this with new dataSets open the posibiliti to retrain the model with ne
 | `pii_retained_3`  | `list`   | List of protein names wich interact with 3' protein |
 | `pii_lost_3`      | `list`   | List of protein names wich lost interaction with 3' protein |
 | `name23`          | `string` | Gene name of the 3' from the refSeq annotation |
-| `promData3`       | `float`  | Promotor actibity of the 3' gene |
+| `promData3`       | `float`  | Promotor activity of the 3' gene |
 | `exprData3`       | `float`  | Expression data of the 3' gene |
 | `utrData3`        | `float`  | Expression data of the 3' gene from utr region |
 | `n_self_pii_retained3`| `int`| Number of protein interactions corrected of 3' protein |
@@ -222,10 +222,10 @@ Changing this with new dataSets open the posibiliti to retrain the model with ne
 | `P3`              | `int`    | Number of P in the GO groups in 3' gene |
 | `TF3`             | `int`    | Number of TF in the GO groups in 3' gene |
 | `FUSION_PROTEIN`  | `string` | Sequence of the protein result of the fusion |
-| `vector`          | `list`   | Vecor used to classify the fusion |
-| `RF_prob`         | `float`  | Probability obatin with the Random Forest model |
-| `XGB_prob`        | `float`  | Probability obatin with the XGBoost model |
-| `TF_prob`         | `float`  | Probability obatin with the TensorFlow CNN model |
+| `vector`          | `list`   | Vector used to classify the fusion |
+| `RF_prob`         | `float`  | Probability obtain with the Random Forest model |
+| `XGB_prob`        | `float`  | Probability obtain with the XGBoost model |
+| `TF_prob`         | `float`  | Probability obtain with the TensorFlow CNN model |
 | `RF_Classification`  | `string` | Class obtain with the probability from the Random Forest model |
 | `XGB_Classification` | `string` |  Class obtain with the probability from the XGBoost model |
 | `TF_Classification` | `string` |  Class obtain with the probability from the TensorFlow CNN model |
