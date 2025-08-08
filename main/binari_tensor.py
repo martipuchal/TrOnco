@@ -134,8 +134,8 @@ xgb_test = xgb.DMatrix(X_test, y_test, enable_categorical=True)
 # Set up the parameters is going to use to classify
 n=1000
 
-param = {'max_depth': depth, 'eta': 0.131,"min_child_weight":child, "subsample": 1, "colsample_bytree":0.949,"colsample_bylevel":0.94,"n_estimator":300,
-         "base_score":0.8,"seed_per_iteration":True, "max_delt_step":0}
+param = {'max_depth': depth, 'eta': 0.131,"min_child_weight":child, "subsample": 1, "colsample_bytree":0.949,"colsample_bylevel":0.94,
+         "base_score":0.8,"seed_per_iteration":True}
 
 param['nthread'] = 4
 param['eval_metric'] = 'auc' # auc
