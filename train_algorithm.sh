@@ -1,21 +1,31 @@
-#!/bin/bash
+usage="$(basename "Trai_algorithm") [-h] [-n path/of/Normal_file] [-t path/of/Turmoral_file]  -- Script to re-train the different models to perform the classification.\n
+\n
+where:\n
+    -h  show this help text\n
+    -s  File and path to the normal tissue fusions\n
+    -t  File and path to the tumoral tissue fusions\n"
 
-if [ "$1" == "-h" ]; then
-  echo "Usage: ` $0` [Normal file path] [Tumoral file path]"
-  exit 0
-fi
+declare -i helpval=0
+while getopts ":h:n:t:" opt; do
+  case $opt in
+    h) echo $usage
+       exit
+       ;;
+    n) normal=${OPTARG}
+       helpval+=1
+      ;;
+    t) tumor=${OPTARG}
+       helpval+=1
+      ;;
+  esac
+done
 
-
-# Files:
-normal= $1 #"train/Normal_nogenes.csv" 
-tumor=$2 #"train/Tumoral_nogenes.csv"
-
+echo $helpval
+if [ ${helpval} = 2 ]; then
 
 ## XGBoost parameters
 d=10 # max_depth
 c=1	 # min_child_weight
-
-
 
 # Vector building with the negative(no-oncogenic) and positives(oncogenic) fusions.
 echo "## Vector"
@@ -36,12 +46,8 @@ rm tmp/*_vector
 
 
 
+else 
+	echo "Wrong flags used"
+	echo $usage
 
-
-
-
-
-
-
-
-
+fi
