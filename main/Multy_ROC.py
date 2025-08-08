@@ -5,12 +5,18 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, roc_auc_score,accuracy_score
 
-
 import joblib
 import xgboost as xgb
 import tensorflow as tf
 import os
+import sys
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+# Import the ROC for the 2 different models:
+sys.path.insert(0,"/home/martipuchal/TFM/TrOnco/comp_test/DEEPrior")
+sys.path.insert(0,"/home/martipuchal/TFM/TrOnco/comp_test/oncofuse")
+from DEEPrior_EVAL import prior
+from ONCOFUSE_EVAL import onco
 
 def class_round(num:float, threshold:float):
 
@@ -48,8 +54,8 @@ XGB_model.load_model(path_models+"modelXGB.json")
 TF_model = tf.keras.models.load_model(path_models+"modelTF.h5")
 
 # Test with curated data
-not_vector_df = pd.read_csv(Homedir+"normal_vector_train",sep=",")
-yes_vector_df = pd.read_csv(Homedir+"tumor_vector_train",sep=",")
+not_vector_df = pd.read_csv(Homedir+"normal_vector_test",sep=",")
+yes_vector_df = pd.read_csv(Homedir+"tumor_vector_test",sep=",")
 
 # Add labels to the dataframes
 not_vector_df["target"] = 0
@@ -132,6 +138,8 @@ plt.figure()
 plt.plot(fpr_RF, tpr_RF, label='ROC curve RF(area = %0.2f)' % roc_auc_RF)
 plt.plot(fpr_XGB, tpr_XGB, label='ROC curve XGB(area = %0.2f)' % roc_auc_XGB)
 plt.plot(fpr_TF, tpr_TF, label='ROC curve TF(area = %0.2f)' % roc_auc_TF)
+onco()
+prior()
 plt.plot([0, 1], [0, 1], 'k--', label='No Skill')
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])
@@ -139,4 +147,4 @@ plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.title('ROC Curve for the different models')
 plt.legend()
-plt.savefig(Homedir+'graph/Multy_ROC.pdf')
+plt.savefig(Homedir+'graph/Multy_ROC_new.pdf')
