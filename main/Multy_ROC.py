@@ -5,12 +5,18 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, roc_auc_score,accuracy_score
 
-
 import joblib
 import xgboost as xgb
 import tensorflow as tf
 import os
+import sys
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+# Import the ROC for the 2 different models:
+sys.path.insert(0,"/home/martipuchal/TFM/TrOnco/comp_test/DEEPrior")
+sys.path.insert(0,"/home/martipuchal/TFM/TrOnco/comp_test/oncofuse")
+from DEEPrior_EVAL import prior
+from ONCOFUSE_EVAL import onco
 
 def class_round(num:float, threshold:float):
 
@@ -34,6 +40,9 @@ path_models = "resources/common/"
 
 #! Load the models
 
+config_df = pd.read_csv(path_models+"config.txt",sep="\t")
+RF_threshold, XGB_threshold, TF_threshold = config_df["thresholds"]
+
 # Load RF classifier
 RF_model = joblib.load(path_models+"modelRF.bin")
 
@@ -45,8 +54,8 @@ XGB_model.load_model(path_models+"modelXGB.json")
 TF_model = tf.keras.models.load_model(path_models+"modelTF.h5")
 
 # Test with curated data
-not_vector_df = pd.read_csv(Homedir+"Normal_vector",sep=",")
-yes_vector_df = pd.read_csv(Homedir+"Tumor_vector",sep=",")
+not_vector_df = pd.read_csv(Homedir+"normal_vector_test",sep=",")
+yes_vector_df = pd.read_csv(Homedir+"tumor_vector_test",sep=",")
 
 # Add labels to the dataframes
 not_vector_df["target"] = 0
@@ -61,8 +70,8 @@ X_train,X_test,y_train,y_test = train_test_split(x, y, test_size=0.2, random_sta
 
 # Evaluate the RF method
 y_pred_prob = RF_model.predict_proba(X_test)[:, 1]
-fpr, tpr, thresholds = roc_curve(y_test, y_pred_prob, pos_label=1)
-roc_auc = roc_auc_score(y_test, [round(val) for val in y_pred_prob])
+fpr, tpr, thresholds = fpr_RF, tpr_RF, thresholds_RF = roc_curve(y_test, y_pred_prob, pos_label=1)
+roc_auc = roc_auc_RF = roc_auc_score(y_test, [class_round(val,RF_threshold) for val in y_pred_prob])
 print(f'AUC score of the RandomForest: {roc_auc}')
 
 # Plot the ROC curve
@@ -75,14 +84,14 @@ plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.title('ROC Curve for the RandomForest model')
 plt.legend()
-plt.savefig(Homedir+'graph/ROC_RF.pdf')
+plt.savefig(Homedir+'graph/ROC.pdf')
 #print("\nClassification Report:\n", classification_rep)
 
 
 # Evaluate the XGB method
 y_pred_prob  = XGB_model.predict_proba(X_test)[:, 1]
-fpr, tpr, thresholds = roc_curve(y_test, y_pred_prob, pos_label=1)
-roc_auc = roc_auc_score(y_test, [class_round(float(val),0.8) for val in y_pred_prob])
+fpr, tpr, thresholds = fpr_XGB, tpr_XGB, thresholds_XGB = roc_curve(y_test, y_pred_prob, pos_label=1)
+roc_auc = roc_auc_XGB = roc_auc_score(y_test, [class_round(float(val),XGB_threshold) for val in y_pred_prob])
 print(f'AUC score of the XGBoost: {roc_auc}')
 
 # Plot the ROC curve
@@ -95,7 +104,7 @@ plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.title('ROC Curve for th XGBoost model')
 plt.legend()
-plt.savefig(Homedir+'graph/ROC_XGB.pdf')
+plt.savefig(Homedir+'graph/ROC.pdf')
 #print("\nClassification Report:\n", classification_rep)
 
 
@@ -107,8 +116,8 @@ for vector in X_test:
     prob_positive = TF_model.predict(input_X)[0, 1]
     y_pred_prob.append(prob_positive)
 
-fpr, tpr, thresholds = roc_curve(y_test, y_pred_prob, pos_label=1)
-roc_auc = roc_auc_score(y_test, [class_round(float(val),0.8) for val in y_pred_prob])
+fpr, tpr, thresholds = fpr_TF, tpr_TF, thresholds_TF = roc_curve(y_test, y_pred_prob, pos_label=1)
+roc_auc = roc_auc_TF = roc_auc_score(y_test, [class_round(float(val),TF_threshold) for val in y_pred_prob])
 print(f'AUC score of the TensorFlow: {roc_auc}')
 
 # Plot the ROC curve
@@ -121,6 +130,21 @@ plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.title('ROC Curve for th TensorFlow model')
 plt.legend()
-plt.savefig(Homedir+'graph/ROC_TF.pdf')
+plt.savefig(Homedir+'graph/ROC.pdf')
 #print("\nClassification Report:\n", classification_rep)
 
+# Plot the ROC curve for all models
+plt.figure()  
+plt.plot(fpr_RF, tpr_RF, label='ROC curve RF(area = %0.2f)' % roc_auc_RF)
+plt.plot(fpr_XGB, tpr_XGB, label='ROC curve XGB(area = %0.2f)' % roc_auc_XGB)
+plt.plot(fpr_TF, tpr_TF, label='ROC curve TF(area = %0.2f)' % roc_auc_TF)
+onco()
+prior()
+plt.plot([0, 1], [0, 1], 'k--', label='No Skill')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('ROC Curve for the different models')
+plt.legend()
+plt.savefig(Homedir+'graph/Multy_ROC_new.pdf')

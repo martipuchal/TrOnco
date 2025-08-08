@@ -62,21 +62,21 @@ parser = argparse.ArgumentParser(
 # Arguments to add parameters to the different algorithms. 
 parser.add_argument("-d","--depth",default=9)
 parser.add_argument("-c","--child",default=35) # 20
-parser.add_argument("-t","--tree",default="approx",choices=("hist", "approx"))
+#parser.add_argument("-t","--tree",default="approx",choices=("hist", "approx"))
 
 # Store the parameters in a variable.
 args = parser.parse_args()
 
 depth = int(args.depth)
 child = int(args.child)
-tree_m = str(args.tree)
+#tree_m = str(args.tree)
 
 # Directories
 path = "tmp/"
 save_path = "resources/common/"
 
-notoncofusions = pd.read_csv(path+"Normal_vector",sep=",")
-oncofusions = pd.read_csv(path+"Tumor_vector",sep=",")
+notoncofusions = pd.read_csv(path+"normal_vector_train",sep=",")
+oncofusions = pd.read_csv(path+"tumor_vector_train",sep=",")
 
 # Build the datafrmaes
 oncofusions["target"] = 1
@@ -87,7 +87,7 @@ x = df.iloc[:, :-1].values
 y = df.iloc[:, -1].values
 
 # Split teh data in to train/test
-X_train,X_test,y_train,y_test = train_test_split(x, y, test_size=0.2, random_state=seed, stratify=y)
+X_train,X_test,y_train,y_test = train_test_split(x, y, test_size=0.1, random_state=seed, stratify=y)
 
 ## Random forest ##
 print("\n","##Random Forest moodel:##")
@@ -110,7 +110,11 @@ print(f'Sensitivity: {sensitivity * 100:.2f}%')
 # Save the RF
 joblib.dump(classifier, save_path+"modelRF.bin")
 
-
+def round(num:int):
+    if num<0.5:
+        return 0
+    else:
+        return 1
 
 # ROC curve for the RF model
 y_pred_prob = classifier.predict_proba(X_test)[:, 1]
@@ -130,8 +134,8 @@ xgb_test = xgb.DMatrix(X_test, y_test, enable_categorical=True)
 # Set up the parameters is going to use to classify
 n=1000
 
-param = {'max_depth': depth, 'eta': 0.5, 'objective': 'binary:logistic',"tree_method":tree_m,"min_child_weight":child, "subsample": 0.5, "colsample_bynode":0.6,
-         "base_score":0.8,"seed_per_iteration":True}
+param = {'max_depth': depth, 'eta': 0.131,"min_child_weight":child, "subsample": 1, "colsample_bytree":0.949,"colsample_bylevel":0.94,"n_estimator":300,
+         "base_score":0.8,"seed_per_iteration":True, "max_delt_step":0}
 
 param['nthread'] = 4
 param['eval_metric'] = 'auc' # auc
@@ -166,7 +170,7 @@ print("Selected itineration: ",iteration)
 model = model_base[iteration]
 
 # Evaluate the model
-preds = y_pred_prob =  model.predict(xgb_test)
+preds = noroundpreds =  model.predict(xgb_test)
 
 def round (num:float):
     """Modify the threshold of the function.
@@ -193,8 +197,6 @@ print(f'Sensitivity: {sensitivity * 100:.2f}%')
 
 roc_auc = roc_auc_score(y_test, preds)
 print("ROC AUC of the XGBoost model",roc_auc)
-fpr, tpr, thresholds = evalXGB = roc_curve(y_test, y_pred_prob, pos_label=1)
-
 
 classification_rep = classification_report(y_test, preds)
 
@@ -202,7 +204,7 @@ classification_rep = classification_report(y_test, preds)
 # Save the model
 model.save_model(save_path+"modelXGB.json")
 
-
+fpr, tpr, thresholds = evalXGB = roc_curve(y_test, noroundpreds, pos_label=1)
 
 ## Binary Classification Model (pos/neg) with CNN (TensorFlow)
 ## test
@@ -250,7 +252,7 @@ early_stopping = EarlyStopping(
 )
 
 checkpoint = ModelCheckpoint(
-    'best_model.h5',    # Save path
+    save_path+'modelTF.h5',    # Save path
     monitor='val_auc',  # Save the best model based on val_auc
     save_best_only=True,
     mode='max',         # Save when AUC increases
@@ -262,8 +264,8 @@ checkpoint = ModelCheckpoint(
 history = model.fit(
     X_train, y_train_onehot,
     validation_data=(X_test, y_test_onehot),
-    epochs=15,
-    verbose=1, callbacks=[early_stopping,checkpoint],batch_size=5,validation_split=0.2,
+    epochs=30,
+    verbose=1, callbacks=[early_stopping,checkpoint],batch_size=10,validation_split=0.1,
     class_weight={0: 0.666, 1: 2.0}
 )
 
@@ -305,7 +307,7 @@ with open(save_path+"config.txt", "w") as f:
         def obtain_t ():
             fpr_max = max(fpr)
             for f, t, th in zip(fpr, tpr, thresholds):
-                if t >= max(tpr) and f<=fpr_max:
+                if t >= max(tpr) and f<=fpr_max :
 
                     fpr_max = f
 
