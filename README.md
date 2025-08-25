@@ -122,10 +122,10 @@ As you can see on the help message you have to parse the path to Normal fusions 
 
 ```bash
 singularity run images/TrOnco_image.sif ./train_algorithm.sh [-h] [-n path/of/Normal_file] [-t path/of/Turmoral_file] [-s]
-    -h  show this help text\n
-    -n  File and path to the normal tissue fusions\n
-    -t  File and path to the tumoral tissue fusions\n
-    -s	Flag to not save the models\n"
+    -h  show this help text
+    -n  File and path to the normal tissue fusions
+    -t  File and path to the tumoral tissue fusions
+    -s	Flag to not save the models
 ```
 Changing this with new dataSets open the posibiliti to retrain the model with new data and generate new models. When this script is executed the old models are preplaced with the new ones. This afect the three different algorithms(**RandomForest**, **XGBoost** and **the TensorFlow CNN**)
 
