@@ -1,4 +1,4 @@
-usage="$(basename "Trai_algorithm") [-h] [-n path/of/Normal_file] [-t path/of/Turmoral_file] [-s] -- Script to re-train the different models to perform the classification.\n
+usage="$(basename "Train_algorithm") [-h] [-n path/of/Normal_file] [-t path/of/Turmoral_file] [-s] -- Script to re-train the different models to perform the classification.\n
 \n
 where:\n
     -h  show this help text\n
