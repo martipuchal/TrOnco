@@ -116,13 +116,16 @@ A vector is a combination of elements, in this case, we have a numeric Vectorcom
 A clue addition to this program is the easy implementation of new features to the developed vector. By modifying the **vector_list_str** variable(schema of the vector) and the **vector** variable both on the TrOnco.py direcly modify the vector. And after a retrain of teh model the TrOnco.py script can be use normaly.
 
 - Train algorithm:
-In this project we want to facilitate the re-training of the models developed. For this we generate a script(**train_algorithm.sh**) to retrain the model with the desired data.
+In this project we want to facilitate the re-training of the models developed. For this we generate a script(**train_algorithm.sh**) to retrain the model with the desired data. This scripts needs to be run on the TrOnco folder.
 
-Firts lines of this files are:
+As you can see on the help message you have to parse the path to Normal fusions file and the tumor fusiosn file
+
 ```bash
-# Files:
-normal="train/Normal_nogenes.csv"
-tumor="train/Tumoral_nogenes.csv"
+singularity run images/TrOnco_image.sif ./train_algorithm.sh [-h] [-n path/of/Normal_file] [-t path/of/Turmoral_file] [-s]
+    -h  show this help text\n
+    -n  File and path to the normal tissue fusions\n
+    -t  File and path to the tumoral tissue fusions\n
+    -s	Flag to not save the models\n"
 ```
 Changing this with new dataSets open the posibiliti to retrain the model with new data and generate new models. When this script is executed the old models are preplaced with the new ones. This afect the three different algorithms(**RandomForest**, **XGBoost** and **the TensorFlow CNN**)
 
