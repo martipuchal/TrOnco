@@ -867,6 +867,7 @@ if args.v:
     merged_final_save.write_csv(args.outputFileName)
     print(merged_final_save)
 else:
+    print(merged_final.columns)
     col_list = ["rightBreakpoint","leftBreakpoint","FUSION_GENES","RF_prob","RF_Classification","XGB_prob","XGB_Classification","CNN_prob","CNN_Classification",
                 "FUSION_PROTEIN","GO","GO3","domain_retained","domain_broken","domain_lost","domain_retained3","domain_broken3","domain_lost3"]
     merged_final = merged_final.select(col_list).rename({"GO":"GO5","domain_retained":"domain_retained5","domain_broken":"domain_broken5","domain_lost":"domain_lost5"})

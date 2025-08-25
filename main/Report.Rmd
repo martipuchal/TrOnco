@@ -1,0 +1,34 @@
+---
+title: "Training method report"
+author: "Martí Puchal Batriu"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# ROC curve
+
+ROC curve of the different models for the train dataset
+
+![](../tmp/Multy_ROC.png)
+
+# Confusion matrix{.tabset}
+
+Using the threshold from the previous ROC curve, prioritizing maximum true positive rate with the minimum false positive rate, the confusion matrix are build for each method.
+
+
+## Random Forest
+
+![](../tmp/confuM_RandomForest.png)
+
+## XGBoost
+
+![](../tmp/confuM_XGBoost.png)
+
+## CNN
+
+![](../tmp/confuM_CNN.png)
