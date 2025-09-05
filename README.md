@@ -3,6 +3,8 @@
 
 <img alt="Python" src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&logo=python&logoColor=white" /> <img alt="R" src="https://img.shields.io/badge/-R-276DC3?style=flat-square&logo=r&logoColor=white" /> 
 
+<img src="logos/image_1.png" alt="TrOnco Logo" width="200"/>
+
 # TrOnco
 
 TrOnco is a novel machine learning tool based on random forest, XGBoost and CNN of TensorFlow. Designed to classify translocations as oncogenic or non-oncogenic by integrating multiple omics data, including genomics, transcriptomics, or proteomics. With an easy retraining capability, TrOnco offers the option to keep updating the models.
