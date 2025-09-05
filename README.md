@@ -157,7 +157,7 @@ Changing this with new dataSets open the posibiliti to retrain the model with ne
 - n_piis_lost_5 / n_piis_lost_3 -> Protein interactions lost of the resulting protein of the 5' gene / 3' gene
 
 
-### Output table columns
+### Table columns used in the TrOnco analysis 
 
 
 | Column Name       | Type     |  Description |
