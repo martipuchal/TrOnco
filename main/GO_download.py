@@ -6,10 +6,9 @@ Homedir = str(Path(__file__).resolve().parent.parent)
 path_to_file = Homedir+"/resources/common/biomart_results"
 
 # Connect to a dataset
-dataset = Dataset(
-    name='hsapiens_gene_ensembl',
-    host='http://www.ensembl.org'
-)
+server = Server(host='http://www.ensembl.org', use_cache = False) 
+dataset = (server.marts['ENSEMBL_MART_ENSEMBL']
+                 .datasets['hsapiens_gene_ensembl'])
 
 # Query data
 df = dataset.query(
